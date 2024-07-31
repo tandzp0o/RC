@@ -12,4 +12,8 @@
     <PackageReference Include="Neo4j.Driver" Version="5.22.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="SP\" />
+  </ItemGroup>
+
 </Project>
