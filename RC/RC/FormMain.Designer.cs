@@ -56,7 +56,7 @@
             // 
             // PN1
             // 
-            PN1.Location = new Point(3, 547);
+            PN1.Location = new Point(3, 565);
             PN1.Name = "PN1";
             PN1.Size = new Size(634, 156);
             PN1.TabIndex = 2;
@@ -65,7 +65,7 @@
             // 
             Title.AutoSize = true;
             Title.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            Title.Location = new Point(3, 523);
+            Title.Location = new Point(3, 541);
             Title.Name = "Title";
             Title.Size = new Size(99, 21);
             Title.TabIndex = 3;
@@ -75,7 +75,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(3, 314);
+            label2.Location = new Point(3, 332);
             label2.Name = "label2";
             label2.Size = new Size(55, 21);
             label2.TabIndex = 4;
@@ -85,7 +85,7 @@
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(3, 105);
+            label3.Location = new Point(3, 123);
             label3.Name = "label3";
             label3.Size = new Size(80, 21);
             label3.TabIndex = 6;
@@ -93,14 +93,14 @@
             // 
             // PN2
             // 
-            PN2.Location = new Point(3, 338);
+            PN2.Location = new Point(3, 356);
             PN2.Name = "PN2";
             PN2.Size = new Size(634, 156);
             PN2.TabIndex = 3;
             // 
             // PN3
             // 
-            PN3.Location = new Point(3, 129);
+            PN3.Location = new Point(3, 147);
             PN3.Name = "PN3";
             PN3.Size = new Size(634, 156);
             PN3.TabIndex = 4;

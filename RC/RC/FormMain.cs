@@ -22,15 +22,26 @@ namespace RC
             _productPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                AutoScroll = true
-            };
-            _categoryPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
+                BackColor = Color.White,
                 AutoScroll = true
             };
             PN1.Controls.Add(_productPanel);
+
+            _categoryPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                BackColor= Color.White,
+                AutoScroll = true
+            };
             PN3.Controls.Add(_categoryPanel);
+
+            _brandPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
+                AutoScroll = true
+            };
+            PN2.Controls.Add(_brandPanel);
 
             Button refreshButton = new Button
             {
@@ -39,12 +50,30 @@ namespace RC
             };
             refreshButton.Click += async (sender, e) => await LoadProducts();
             PN1.Controls.Add(refreshButton);
+
+            Button refreshButton1 = new Button
+            {
+                Text = "Refresh Categorys",
+                Dock = DockStyle.Top
+            };
+            refreshButton.Click += async (sender, e) => await LoadCategorys();
+            PN3.Controls.Add(refreshButton1);
+
+            Button refreshButton2 = new Button
+            {
+                Text = "Refresh Categorys",
+                Dock = DockStyle.Top
+            };
+            refreshButton.Click += async (sender, e) => await LoadCategorys();
+            PN2.Controls.Add(refreshButton2);
         }
 
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
             await LoadProducts();
+            await LoadCategorys();
+            await LoadBrands();
         }
 
         private async Task LoadProducts()
@@ -63,52 +92,101 @@ namespace RC
                 MessageBox.Show($"An error occurred: {ex.Message}");
             }
         }
-        //private async Task LoadCategorys()
-        //{
-        //    try
-        //    {
-        //        _categoryPanel.Controls.Clear();
-        //        var categorys = await _connection.GetCategory();
-        //        foreach (var cate in categorys)
-        //        {
-        //            AddCategoryToPanel(cate);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"An error occurred: {ex.Message}");
-        //    }
-        //}
+        ///////////////////////////////////////////////////// cate
+        private async Task LoadCategorys()
+        {
+            try
+            {
+                _categoryPanel.Controls.Clear();
+                var categorys = await _connection.GetCategory();
+                foreach (var cate in categorys)
+                {
+                    AddCategoryToPanel(cate);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}");
+            }
+        }
 
-        //private void AddCategoryToPanel(Category category)
-        //{
-        //    PictureBox pictureBox = new PictureBox
-        //    {
-        //        Width = 100,
-        //        Height = 100,
-        //        SizeMode = PictureBoxSizeMode.Zoom,
-        //        Image = LoadImage(category.Image) ?? null,
-        //        Margin = new Padding(5)
-        //    };
+        private async Task LoadBrands()
+        {
+            try
+            {
+                _brandPanel.Controls.Clear();
+                var brands = await _connection.GetBrand();
+                foreach (var brand in brands)
+                {
+                    AddBrandToPanel(brand);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}");
+            }
+        }
 
-        //    Label nameLabel = new Label
-        //    {
-        //        Text = category.Name,
-        //        TextAlign = ContentAlignment.MiddleCenter,
-        //        Width = 100
-        //    };
+        private void AddBrandToPanel(Brand brand)
+        {
+            PictureBox pictureBox = new PictureBox
+            {
+                Width = 100,
+                Height = 100,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Image = LoadImage(brand.Image) ?? null,
+                Margin = new Padding(5)
+            };
 
-        //    Panel categoryPanel = new Panel
-        //    {
-        //        Width = 110,
-        //        Height = 130
-        //    };
-        //    categoryPanel.Controls.Add(pictureBox);
-        //    categoryPanel.Controls.Add(nameLabel);
-        //    nameLabel.Location = new System.Drawing.Point(0, 105);
+            Label nameLabel = new Label
+            {
+                Text = brand.Name,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Width = 100
+            };
 
-        //    _productPanel.Controls.Add(categoryPanel);
-        //}
+            Panel brandPanel = new Panel
+            {
+                Width = 110,
+                Height = 130
+            };
+            brandPanel.Controls.Add(pictureBox);
+            brandPanel.Controls.Add(nameLabel);
+            nameLabel.Location = new System.Drawing.Point(0, 105);
+
+            _brandPanel.Controls.Add(brandPanel);
+        }
+
+        private void AddCategoryToPanel(Category category)
+        {
+            PictureBox pictureBox = new PictureBox
+            {
+                Width = 100,
+                Height = 100,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Image = LoadImage(category.Image) ?? null,
+                Margin = new Padding(5)
+            };
+
+            Label nameLabel = new Label
+            {
+                Text = category.Name,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Width = 100
+            };
+
+            Panel categoryPanel = new Panel
+            {
+                Width = 110,
+                Height = 130
+            };
+            categoryPanel.Controls.Add(pictureBox);
+            categoryPanel.Controls.Add(nameLabel);
+            nameLabel.Location = new System.Drawing.Point(0, 105);
+
+            _categoryPanel.Controls.Add(categoryPanel);
+        }
+        /////////////////////////////
 
         private void AddProductToPanel(Product product)
         {
@@ -192,24 +270,40 @@ namespace RC
                 return products;
             });
         }
-        // lấy toàn bộ category
-        //public async Task<List<Category>> GetCategory()
-        //{
-        //    await using var session = _driver.AsyncSession();
-        //    return await session.ReadTransactionAsync(async tx =>
-        //    {
-        //        var result = await tx.RunAsync("MATCH (c:Category) RETURN c.category AS category");
-        //        var categorys = new List<Category>();
-        //        await foreach (var record in result)
-        //        {
-        //            string name = record["name"].As<string>();
-        //            string image = record["image"].As<string>();
-        //            categorys.Add(new Category(name, image));
-        //        }
-        //        return categorys;
-        //    });
-        //}
-
+        //lấy toàn bộ category
+        public async Task<List<Category>> GetCategory()
+        {
+            await using var session = _driver.AsyncSession();
+            return await session.ReadTransactionAsync(async tx =>
+            {
+                var result = await tx.RunAsync("MATCH (c:Category) RETURN c.name AS name, c.image AS image");
+                var categorys = new List<Category>();
+                await foreach (var record in result)
+                {
+                    string name = record["name"].As<string>();
+                    string image = record["image"].As<string>();
+                    categorys.Add(new Category(name, image));
+                }
+                return categorys;
+            });
+        }
+        //lấy toàn bộ brand
+        public async Task<List<Brand>> GetBrand()
+        {
+            await using var session = _driver.AsyncSession();
+            return await session.ReadTransactionAsync(async tx =>
+            {
+                var result = await tx.RunAsync("MATCH (b:Brand) RETURN b.name AS name, b.image AS image");
+                var brands = new List<Brand>();
+                await foreach (var record in result)
+                {
+                    string name = record["name"].As<string>();
+                    string image = record["image"].As<string>();
+                    brands.Add(new Brand(name, image));
+                }
+                return brands;
+            });
+        }
         public void Dispose()
         {
             _driver?.Dispose();
@@ -247,31 +341,59 @@ namespace RC
         }
     }
 
-    //public class Category
-    //{
-    //    public string Name { get; }
-    //    public string Image { get; }
-    //    public string projectDirectory = GetSiblingDirectory("ImageApp");
-    //    public static string GetSiblingDirectory(string folderName)
-    //    {
-    //        string executingAssemblyPath = Assembly.GetExecutingAssembly().Location;
-    //        string binDirectory = Path.GetDirectoryName(executingAssemblyPath);
-    //        string projectDirectory = Directory.GetParent(binDirectory).FullName;
-    //        string a = Directory.GetParent(projectDirectory).FullName;
-    //        string b = Directory.GetParent(a).FullName;
-    //        string siblingDirectory = Path.Combine(b, folderName);
-    //        return siblingDirectory;
-    //    }
+    public class Category
+    {
+        public string Name { get; }
+        public string Image { get; }
+        public string projectDirectory = GetSiblingDirectory("ImageApp");
+        public static string GetSiblingDirectory(string folderName)
+        {
+            string executingAssemblyPath = Assembly.GetExecutingAssembly().Location;
+            string binDirectory = Path.GetDirectoryName(executingAssemblyPath);
+            string projectDirectory = Directory.GetParent(binDirectory).FullName;
+            string a = Directory.GetParent(projectDirectory).FullName;
+            string b = Directory.GetParent(a).FullName;
+            string siblingDirectory = Path.Combine(b, folderName);
+            return siblingDirectory;
+        }
 
-    //    public string RemoveQuotes(string input)
-    //    {
-    //        return input.Replace("\"", "").Replace("'", "");
-    //    }
+        public string RemoveQuotes(string input)
+        {
+            return input.Replace("\"", "").Replace("'", "");
+        }
 
-    //    public Category(string name, string image)
-    //    {
-    //        Name = name;
-    //        Image = projectDirectory + "\\" + RemoveQuotes(image);
-    //    }
-    //}
+        public Category(string name, string image)
+        {
+            Name = name;
+            Image = projectDirectory + "\\" + RemoveQuotes(image);
+        }
+    }
+
+    public class Brand
+    {
+        public string Name { get; }
+        public string Image { get; }
+        public string projectDirectory = GetSiblingDirectory("ImageApp");
+        public static string GetSiblingDirectory(string folderName)
+        {
+            string executingAssemblyPath = Assembly.GetExecutingAssembly().Location;
+            string binDirectory = Path.GetDirectoryName(executingAssemblyPath);
+            string projectDirectory = Directory.GetParent(binDirectory).FullName;
+            string a = Directory.GetParent(projectDirectory).FullName;
+            string b = Directory.GetParent(a).FullName;
+            string siblingDirectory = Path.Combine(b, folderName);
+            return siblingDirectory;
+        }
+
+        public string RemoveQuotes(string input)
+        {
+            return input.Replace("\"", "").Replace("'", "");
+        }
+
+        public Brand(string name, string image)
+        {
+            Name = name;
+            Image = projectDirectory + "\\" + RemoveQuotes(image);
+        }
+    }
 }
