@@ -1,4 +1,5 @@
 ﻿using Neo4j.Driver;
+using System.Reflection;
 
 namespace RC
 {
@@ -6,6 +7,8 @@ namespace RC
     {
         public string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName; // đường dẫn đến mục sản phẩm
         private FlowLayoutPanel _productPanel;
+        private FlowLayoutPanel _categoryPanel;
+        private FlowLayoutPanel _brandPanel;
         private string maSP;
         private Neo4jConnection _connection;
         public FormMain()
@@ -21,7 +24,13 @@ namespace RC
                 Dock = DockStyle.Fill,
                 AutoScroll = true
             };
-            this.Controls.Add(_productPanel);
+            _categoryPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true
+            };
+            PN1.Controls.Add(_productPanel);
+            PN3.Controls.Add(_categoryPanel);
 
             Button refreshButton = new Button
             {
@@ -29,7 +38,7 @@ namespace RC
                 Dock = DockStyle.Top
             };
             refreshButton.Click += async (sender, e) => await LoadProducts();
-            this.Controls.Add(refreshButton);
+            PN1.Controls.Add(refreshButton);
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -54,6 +63,52 @@ namespace RC
                 MessageBox.Show($"An error occurred: {ex.Message}");
             }
         }
+        //private async Task LoadCategorys()
+        //{
+        //    try
+        //    {
+        //        _categoryPanel.Controls.Clear();
+        //        var categorys = await _connection.GetCategory();
+        //        foreach (var cate in categorys)
+        //        {
+        //            AddCategoryToPanel(cate);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"An error occurred: {ex.Message}");
+        //    }
+        //}
+
+        //private void AddCategoryToPanel(Category category)
+        //{
+        //    PictureBox pictureBox = new PictureBox
+        //    {
+        //        Width = 100,
+        //        Height = 100,
+        //        SizeMode = PictureBoxSizeMode.Zoom,
+        //        Image = LoadImage(category.Image) ?? null,
+        //        Margin = new Padding(5)
+        //    };
+
+        //    Label nameLabel = new Label
+        //    {
+        //        Text = category.Name,
+        //        TextAlign = ContentAlignment.MiddleCenter,
+        //        Width = 100
+        //    };
+
+        //    Panel categoryPanel = new Panel
+        //    {
+        //        Width = 110,
+        //        Height = 130
+        //    };
+        //    categoryPanel.Controls.Add(pictureBox);
+        //    categoryPanel.Controls.Add(nameLabel);
+        //    nameLabel.Location = new System.Drawing.Point(0, 105);
+
+        //    _productPanel.Controls.Add(categoryPanel);
+        //}
 
         private void AddProductToPanel(Product product)
         {
@@ -120,6 +175,7 @@ namespace RC
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
         }
 
+        // lấy toàn bộ sp
         public async Task<List<Product>> GetProductsAsync()
         {
             await using var session = _driver.AsyncSession();
@@ -136,7 +192,23 @@ namespace RC
                 return products;
             });
         }
-        
+        // lấy toàn bộ category
+        //public async Task<List<Category>> GetCategory()
+        //{
+        //    await using var session = _driver.AsyncSession();
+        //    return await session.ReadTransactionAsync(async tx =>
+        //    {
+        //        var result = await tx.RunAsync("MATCH (c:Category) RETURN c.category AS category");
+        //        var categorys = new List<Category>();
+        //        await foreach (var record in result)
+        //        {
+        //            string name = record["name"].As<string>();
+        //            string image = record["image"].As<string>();
+        //            categorys.Add(new Category(name, image));
+        //        }
+        //        return categorys;
+        //    });
+        //}
 
         public void Dispose()
         {
@@ -146,9 +218,21 @@ namespace RC
 
     public class Product
     {
-        public string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName; // đường dẫn đến mục sản phẩm
+        //public string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName; // đường dẫn đến mục sản phẩm cách 1 (lấy từ thư mục bin)
+        public string projectDirectory = GetSiblingDirectory("SP"); // đường dẫn đến mục sản phẩm (lấy từ chính thư mục SP trong project)
         public string Name { get; }
         public string Image { get; }
+        // lấy đường dẫn đến thư mục sản phẩm cách 2 (tôi chưa tối ưu cái phương thức này)
+        public static string GetSiblingDirectory(string folderName)
+        {
+            string executingAssemblyPath = Assembly.GetExecutingAssembly().Location;
+            string binDirectory = Path.GetDirectoryName(executingAssemblyPath);
+            string projectDirectory = Directory.GetParent(binDirectory).FullName;
+            string a = Directory.GetParent(projectDirectory).FullName;
+            string b = Directory.GetParent(a).FullName;
+            string siblingDirectory = Path.Combine(b, folderName);
+            return siblingDirectory;
+        }
 
         // xoá dấu nháy
         public string RemoveQuotes(string input)
@@ -158,7 +242,36 @@ namespace RC
         public Product(string name, string image)
         {
             Name = name;
-            Image = projectDirectory + "\\SP\\"+ RemoveQuotes(image);
+            //Image = projectDirectory + "\\SP\\"+ RemoveQuotes(image); //cách 1
+            Image = projectDirectory+"\\"+RemoveQuotes(image); // cách 2
         }
     }
+
+    //public class Category
+    //{
+    //    public string Name { get; }
+    //    public string Image { get; }
+    //    public string projectDirectory = GetSiblingDirectory("ImageApp");
+    //    public static string GetSiblingDirectory(string folderName)
+    //    {
+    //        string executingAssemblyPath = Assembly.GetExecutingAssembly().Location;
+    //        string binDirectory = Path.GetDirectoryName(executingAssemblyPath);
+    //        string projectDirectory = Directory.GetParent(binDirectory).FullName;
+    //        string a = Directory.GetParent(projectDirectory).FullName;
+    //        string b = Directory.GetParent(a).FullName;
+    //        string siblingDirectory = Path.Combine(b, folderName);
+    //        return siblingDirectory;
+    //    }
+
+    //    public string RemoveQuotes(string input)
+    //    {
+    //        return input.Replace("\"", "").Replace("'", "");
+    //    }
+
+    //    public Category(string name, string image)
+    //    {
+    //        Name = name;
+    //        Image = projectDirectory + "\\" + RemoveQuotes(image);
+    //    }
+    //}
 }
