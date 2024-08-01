@@ -48,7 +48,6 @@ namespace RC
                 {
                     AddProductToPanel(product);
                 }
-                MessageBox.Show("lấy được sản phẩm");
             }
             catch (Exception ex)
             {
@@ -137,6 +136,7 @@ namespace RC
                 return products;
             });
         }
+        
 
         public void Dispose()
         {
@@ -148,12 +148,17 @@ namespace RC
     {
         public string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName; // đường dẫn đến mục sản phẩm
         public string Name { get; }
-        public String Image { get; }
+        public string Image { get; }
 
+        // xoá dấu nháy
+        public string RemoveQuotes(string input)
+        {
+            return input.Replace("\"", "").Replace("'", "");
+        }
         public Product(string name, string image)
         {
             Name = name;
-            Image = projectDirectory + "\\SP\\"+image;
+            Image = projectDirectory + "\\SP\\"+ RemoveQuotes(image);
         }
     }
 }
