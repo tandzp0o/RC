@@ -1,0 +1,31 @@
+MATCH (n) DETACH DELETE n;  // Clear existing data (optional, be cautious)
+
+LOAD CSV WITH HEADERS FROM 'file:///products.csv' AS row
+MERGE (p:Product {product_id: row.product_id, name: row.name, price: toInteger(row.price), brand: row.brand, image: row.image,category_id:row.category_id})
+
+WITH p
+MATCH (p1:Product {brand: p.brand}), (p2:Product {brand: p.brand})
+WHERE p1.product_id <> p2.product_id
+MERGE (p1)-[sb:SAME_BRAND]-(p2)
+
+WITH p
+MERGE (b:Brand {name: p.brand}) 
+MERGE (p)-[pc:MADE_BY]->(b) 
+
+WITH p
+LOAD CSV WITH HEADERS FROM 'file:///brand.csv' AS row
+MATCH (b:Brand {name: row.name})
+SET b.image = row.image
+
+WITH p
+MERGE (c:Category {category_id: p.category_id})  // Create Category node
+MERGE (p)-[pc:IN_CATEGORY]->(c)  // Create relationship between product and category
+
+with c
+LOAD CSV WITH HEADERS FROM 'file:///category.csv' AS row
+MATCH (c:Category {category_id: row.category_id})
+SET c.name = row.name, c.image = row.image
+
+// goi rieng 
+LOAD CSV WITH HEADERS FROM 'file:///Customer.csv' AS row
+MERGE (customer:Customer {customer_id: row.customer_id, gender: row.gender,name: row.name, email: row.email, age: row.age})
