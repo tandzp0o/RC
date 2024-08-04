@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Neo4j.Driver" Version="5.22.0" />
+    <PackageReference Include="Neo4jClient" Version="5.1.15" />
   </ItemGroup>
 
   <ItemGroup>
