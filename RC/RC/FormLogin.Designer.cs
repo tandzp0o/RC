@@ -67,6 +67,7 @@
             btnDangki.TabIndex = 2;
             btnDangki.Text = "Đăng kí";
             btnDangki.UseVisualStyleBackColor = true;
+            btnDangki.Click += btnDangki_Click;
             // 
             // txtUser
             // 

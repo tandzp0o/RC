@@ -25,7 +25,7 @@ namespace RC
         {
             // Thực hiện các thao tác khởi tạo giao diện người dùng tùy chỉnh
             this.Text = "Login Form";
-            
+
         }
         private async void btnDangnhap_Click(object sender, EventArgs e)
         {
@@ -46,19 +46,19 @@ namespace RC
                 MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private async Task<bool> CheckLogin(string username, string password)
+        private async Task<bool> CheckLogin(string email, string pass)
         {
-            var query = "MATCH (u:User {username: $username}) RETURN u.password AS Password";
+            var query = "MATCH (u:User {email:$email}) RETURN u.pass AS Pass";
 
             using (var session = _driver.AsyncSession())
             {
-                var result = await session.RunAsync(query, new { username });
+                var result = await session.RunAsync(query, new { email});
                 var record = await result.SingleAsync();
 
                 if (record != null)
                 {
                     var retrievedPassword = record["Password"].As<string>();
-                    return password == retrievedPassword;
+                    return pass == retrievedPassword;
                 }
             }
 
@@ -70,6 +70,16 @@ namespace RC
         {
             _driver?.Dispose();
             base.OnFormClosed(e);
+        }
+
+        private void btnDangki_Click(object sender, EventArgs e)
+        {
+            // Mở form đăng ký
+            FormRegister formRegister = new FormRegister();
+            formRegister.Show();
+
+            // Ẩn form đăng nhập hiện tại
+            this.Hide();
         }
     }
 }

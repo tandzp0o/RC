@@ -22,33 +22,33 @@ namespace RC
 
         private async void btnDangki_Click(object sender, EventArgs e)
         {
-            string username = txtUser.Text;
-            string password = txtPassword.Text;
-            string confirmPassword = txtConfirmPassword.Text;
+            //string username = txtUser.Text;
+            //string password = txtPassword.Text;
+            //string confirmPassword = txtConfirmPassword.Text;
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
-            {
-                MessageBox.Show("Vui lòng nhập đầy đủ thông tin.");
-                return;
-            }
+            //if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
+            //{
+            //    MessageBox.Show("Vui lòng nhập đầy đủ thông tin.");
+            //    return;
+            //}
 
-            if (password != confirmPassword)
-            {
-                MessageBox.Show("Mật khẩu xác nhận không khớp.");
-                return;
-            }
+            //if (password != confirmPassword)
+            //{
+            //    MessageBox.Show("Mật khẩu xác nhận không khớp.");
+            //    return;
+            //}
 
-            bool isRegistered = await _userService.RegisterUserAsync(username, password);
+            ////bool isRegistered = await _userService.RegisterUserAsync(username, password);
 
-            if (isRegistered)
-            {
-                MessageBox.Show("Đăng ký thành công!");
-                // Có thể thực hiện các hành động khác như chuyển hướng hoặc đóng form
-            }
-            else
-            {
-                MessageBox.Show("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
-            }
+            //if (isRegistered)
+            //{
+            //    MessageBox.Show("Đăng ký thành công!");
+            //    // Có thể thực hiện các hành động khác như chuyển hướng hoặc đóng form
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
+            //}
         }
 
         private void btnvedangnhap_Click(object sender, EventArgs e)

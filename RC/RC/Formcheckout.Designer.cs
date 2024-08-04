@@ -28,31 +28,60 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Formcheckout));
             button1 = new Button();
+            pictureBox1 = new PictureBox();
+            dataGridView1 = new DataGridView();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new Point(311, 272);
+            button1.Location = new Point(342, 185);
             button1.Name = "button1";
             button1.Size = new Size(87, 37);
             button1.TabIndex = 0;
             button1.Text = "Thanh toán";
             button1.UseVisualStyleBackColor = true;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Location = new Point(254, 8);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(175, 171);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 8;
+            pictureBox1.TabStop = false;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new Point(3, 8);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(240, 181);
+            dataGridView1.TabIndex = 9;
+            // 
             // Formcheckout
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(425, 342);
+            ClientSize = new Size(441, 272);
+            Controls.Add(dataGridView1);
+            Controls.Add(pictureBox1);
             Controls.Add(button1);
             Name = "Formcheckout";
             Text = "Formcheckout";
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
         private Button button1;
+        private PictureBox pictureBox1;
+        private DataGridView dataGridView1;
     }
 }
