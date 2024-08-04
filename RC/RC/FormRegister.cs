@@ -20,35 +20,61 @@ namespace RC
 
         }
 
+        private async Task<bool> isRegistered(string hoTen, string email, string pass, string gender)
+        {
+            var query = "Create (u:Customer {name:'" + hoTen + "',name:'" + email + "',name:'" + pass + "',name:'" + gender + "'})";
+
+            using (var session = _driver.AsyncSession())
+            {
+                var result = await session.RunAsync(query, new { email });
+                var record = await result.SingleAsync();
+
+                if (record != null)
+                {
+                    //var retrievedPassword = record["Pass"].As<string>();
+                    //return pass == retrievedPassword;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private async void btnDangki_Click(object sender, EventArgs e)
         {
-            //string username = txtUser.Text;
-            //string password = txtPassword.Text;
-            //string confirmPassword = txtConfirmPassword.Text;
+            string hoTen = txtName.Text;
+            string email = txtEmail.Text;
+            string pass = txtPassword.Text;
+            string rePass = txtConfirmPassword.Text;
+            string gender="";
+            if (rNam.Checked)
+                gender = "Nam";
+            if (rNu.Checked)
+                gender = "Nữ";
 
-            //if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
-            //{
-            //    MessageBox.Show("Vui lòng nhập đầy đủ thông tin.");
-            //    return;
-            //}
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(pass) || string.IsNullOrEmpty(rePass) || string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(hoTen))
+            {
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin.");
+                return;
+            }
 
-            //if (password != confirmPassword)
-            //{
-            //    MessageBox.Show("Mật khẩu xác nhận không khớp.");
-            //    return;
-            //}
+            if (pass != rePass)
+            {
+                MessageBox.Show("Mật khẩu xác nhận không khớp.");
+                return;
+            }
+            
+            // kiểm tra đã đăng ký
 
-            ////bool isRegistered = await _userService.RegisterUserAsync(username, password);
-
-            //if (isRegistered)
-            //{
-            //    MessageBox.Show("Đăng ký thành công!");
-            //    // Có thể thực hiện các hành động khác như chuyển hướng hoặc đóng form
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
-            //}
+            if (await isRegistered(hoTen, email, pass, gender))
+            {
+                MessageBox.Show("Đăng ký thành công!");
+                // Có thể thực hiện các hành động khác như chuyển hướng hoặc đóng form
+            }
+            else
+            {
+                MessageBox.Show("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
+            }
         }
 
         private void btnvedangnhap_Click(object sender, EventArgs e)

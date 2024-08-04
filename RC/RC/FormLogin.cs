@@ -29,10 +29,10 @@ namespace RC
         }
         private async void btnDangnhap_Click(object sender, EventArgs e)
         {
-            string username = txtUser.Text;
-            string password = txtPassword.Text;
+            string email = txtUser.Text;
+            string pass = txtPassword.Text;
 
-            bool isValid = await CheckLogin(username, password);
+            bool isValid = await CheckLogin(email, pass);
             if (isValid)
             {
                 MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -48,7 +48,7 @@ namespace RC
         }
         private async Task<bool> CheckLogin(string email, string pass)
         {
-            var query = "MATCH (u:User {email:$email}) RETURN u.pass AS Pass";
+            var query = "MATCH (u:Customer {email:'" + email+"'}) RETURN u.pass AS Pass";
 
             using (var session = _driver.AsyncSession())
             {
@@ -57,7 +57,7 @@ namespace RC
 
                 if (record != null)
                 {
-                    var retrievedPassword = record["Password"].As<string>();
+                    var retrievedPassword = record["Pass"].As<string>();
                     return pass == retrievedPassword;
                 }
             }
