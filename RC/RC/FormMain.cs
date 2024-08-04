@@ -1,4 +1,5 @@
 ﻿using Neo4j.Driver;
+using System.Drawing.Imaging;
 using System.Reflection;
 
 namespace RC
@@ -9,7 +10,6 @@ namespace RC
         private FlowLayoutPanel _productPanel;
         private FlowLayoutPanel _categoryPanel;
         private FlowLayoutPanel _brandPanel;
-        private string maSP;
         private Neo4jConnection _connection;
         public FormMain()
         {
@@ -135,8 +135,10 @@ namespace RC
                 Height = 100,
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Image = LoadImage(brand.Image) ?? null,
-                Margin = new Padding(5)
+                Margin = new Padding(5),
             };
+            pictureBox.Tag = brand.Name;
+            pictureBox.Click += PictureBox_Click;
 
             Label nameLabel = new Label
             {
@@ -164,9 +166,11 @@ namespace RC
                 Width = 100,
                 Height = 100,
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Image = LoadImage(category.Image) ?? null,
+                Image = LoadImage(category.Image, category) ?? null,
                 Margin = new Padding(5)
             };
+            pictureBox.Tag = category.Name;
+            pictureBox.Click += PictureBox_Click;
 
             Label nameLabel = new Label
             {
@@ -186,6 +190,18 @@ namespace RC
 
             _categoryPanel.Controls.Add(categoryPanel);
         }
+        //////////////////Click image
+        private async void PictureBox_Click(object sender, EventArgs e)
+        {
+            if (sender is PictureBox pictureBox)
+            {
+                string productName = pictureBox.Tag as string;
+                if (!string.IsNullOrEmpty(productName))
+                {
+                    _connection.HandleProductClickAsync(productName);
+                }
+            }
+        }
         /////////////////////////////
 
         private void AddProductToPanel(Product product)
@@ -198,6 +214,8 @@ namespace RC
                 Image = LoadImage(product.Image) ?? null,
                 Margin = new Padding(5)
             };
+            pictureBox.Tag = product.Name;
+            pictureBox.Click += PictureBox_Click;
 
             Label nameLabel = new Label
             {
@@ -218,7 +236,7 @@ namespace RC
             _productPanel.Controls.Add(productPanel);
         }
 
-        private Image LoadImage(string imagePath)
+        private Image LoadImage(string imagePath, object entity = null)
         {
             try
             {
@@ -226,7 +244,23 @@ namespace RC
                 {
                     using (var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
                     {
-                        return Image.FromStream(stream);
+                        Image image = Image.FromStream(stream);
+                        if (entity != null)
+                        {
+                            if (entity is Product p)
+                            {
+                                image.Tag = p.Name;
+                            }
+                            else if (entity is Brand b)
+                            {
+                                image.Tag = b.Name;
+                            }
+                            else if (entity is Category c)
+                            {
+                                image.Tag = c.Name;
+                            }
+                        }
+                        return image;
                     }
                 }
             }
@@ -242,11 +276,13 @@ namespace RC
             base.OnFormClosing(e);
             _connection.Dispose();
         }
+
     }
 
     public class Neo4jConnection : IDisposable
     {
-        private readonly IDriver _driver;
+        public readonly IDriver _driver;
+        
 
         public Neo4jConnection(string uri, string user, string password)
         {
@@ -304,6 +340,60 @@ namespace RC
                 return brands;
             });
         }
+        // truy vấn category từ product
+        public async Task<Category> GetCategoryFromP(Product p)
+        {
+            await using var session = _driver.AsyncSession();
+            return await session.ReadTransactionAsync(async tx =>
+            {
+                var result = await tx.RunAsync(
+                    "MATCH (a:Product {name: $name})-[:BELONGS_TO]->(b:Category) RETURN b.name AS name, b.image AS image",
+                    new { name = p.Name });
+
+                var record = await result.SingleAsync();
+                if (record != null)
+                {
+                    string name = record["name"].As<string>();
+                    string image = record["image"].As<string>();
+                    return new Category(name, image);
+                }
+                return null;
+            });
+        }
+
+
+
+        // sự kiện click img
+        // sản phẩm
+        public async Task HandleProductClickAsync(string productName)
+        {
+            await using var session = _driver.AsyncSession();
+            var product = await session.ReadTransactionAsync(async tx =>
+            {
+                var result = await tx.RunAsync(
+                    "MATCH (p:Product {name: $name}) " +
+                    "RETURN p.name AS name, p.image AS image, p.price AS price, p.description AS description",
+                    new { name = productName });
+
+                var record = await result.SingleAsync();
+                return new Product(
+                    record["name"].As<string>(),
+                    record["image"].As<string>(),
+                    record["price"].As<decimal>()
+                );
+            });
+
+            UpdateUI(product);
+        }
+
+        private void UpdateUI(Product product)
+        {
+            FormProductDetail productDetail = new FormProductDetail(product);
+            productDetail.ShowDialog();
+        }
+
+        
+        // brand hoặc cate
         public void Dispose()
         {
             _driver?.Dispose();
@@ -316,6 +406,7 @@ namespace RC
         public string projectDirectory = GetSiblingDirectory("SP"); // đường dẫn đến mục sản phẩm (lấy từ chính thư mục SP trong project)
         public string Name { get; }
         public string Image { get; }
+        public decimal Price { get; }
         // lấy đường dẫn đến thư mục sản phẩm cách 2 (tôi chưa tối ưu cái phương thức này)
         public static string GetSiblingDirectory(string folderName)
         {
@@ -338,6 +429,12 @@ namespace RC
             Name = name;
             //Image = projectDirectory + "\\SP\\"+ RemoveQuotes(image); //cách 1
             Image = projectDirectory+"\\"+RemoveQuotes(image); // cách 2
+        }
+        public Product(string name, string image, decimal price = 0)
+        {
+            Name = name;
+            Image = image;
+            Price = price;
         }
     }
 
