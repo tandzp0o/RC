@@ -70,21 +70,21 @@
             txtPassword.Location = new Point(25, 166);
             txtPassword.Name = "txtPassword";
             txtPassword.Size = new Size(284, 23);
-            txtPassword.TabIndex = 11;
+            txtPassword.TabIndex = 3;
             // 
             // txtEmail
             // 
             txtEmail.Location = new Point(25, 111);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(286, 23);
-            txtEmail.TabIndex = 10;
+            txtEmail.TabIndex = 2;
             // 
             // btnDangki
             // 
             btnDangki.Location = new Point(45, 297);
             btnDangki.Name = "btnDangki";
             btnDangki.Size = new Size(93, 40);
-            btnDangki.TabIndex = 9;
+            btnDangki.TabIndex = 7;
             btnDangki.Text = "Đăng kí";
             btnDangki.UseVisualStyleBackColor = true;
             btnDangki.Click += btnDangki_Click;
@@ -114,7 +114,7 @@
             txtConfirmPassword.Location = new Point(23, 221);
             txtConfirmPassword.Name = "txtConfirmPassword";
             txtConfirmPassword.Size = new Size(284, 23);
-            txtConfirmPassword.TabIndex = 14;
+            txtConfirmPassword.TabIndex = 4;
             // 
             // label2
             // 
@@ -150,7 +150,7 @@
             txtName.Location = new Point(25, 56);
             txtName.Name = "txtName";
             txtName.Size = new Size(286, 23);
-            txtName.TabIndex = 18;
+            txtName.TabIndex = 1;
             // 
             // label3
             // 
@@ -167,7 +167,7 @@
             rNu.Location = new Point(190, 265);
             rNu.Name = "rNu";
             rNu.Size = new Size(41, 19);
-            rNu.TabIndex = 17;
+            rNu.TabIndex = 6;
             rNu.TabStop = true;
             rNu.Text = "Nữ";
             rNu.UseVisualStyleBackColor = true;
@@ -178,7 +178,7 @@
             rNam.Location = new Point(72, 265);
             rNam.Name = "rNam";
             rNam.Size = new Size(51, 19);
-            rNam.TabIndex = 16;
+            rNam.TabIndex = 5;
             rNam.TabStop = true;
             rNam.Text = "Nam";
             rNam.UseVisualStyleBackColor = true;

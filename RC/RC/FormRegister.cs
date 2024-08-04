@@ -16,28 +16,48 @@ namespace RC
         public FormRegister()
         {
             InitializeComponent();
-            _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("username", "password"));
-
+            _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "11111111"));
         }
 
         private async Task<bool> isRegistered(string hoTen, string email, string pass, string gender)
         {
-            var query = "Create (u:Customer {name:'" + hoTen + "',name:'" + email + "',name:'" + pass + "',name:'" + gender + "'})";
-
-            using (var session = _driver.AsyncSession())
+            try
             {
-                var result = await session.RunAsync(query, new { email });
-                var record = await result.SingleAsync();
-
-                if (record != null)
+                using (var session = _driver.AsyncSession())
                 {
-                    //var retrievedPassword = record["Pass"].As<string>();
-                    //return pass == retrievedPassword;
-                    return true;
+                    var result = await session.WriteTransactionAsync(async tx =>
+                    {
+                        var checkExistingQuery = "MATCH (u:Customer {email: $email}) RETURN u";
+                        var existingUser = await tx.RunAsync(checkExistingQuery, new { email });
+
+                        if (await existingUser.FetchAsync())
+                        {
+                            return false; // Email đã tồn tại
+                        }
+
+                        var createQuery = @"CREATE (u:Customer {name: $hoTen,email: $email,pass: $pass,gender: $gender})RETURN u";
+
+                        var parameters = new
+                        {
+                            hoTen,
+                            email,
+                            pass,
+                            gender
+                        };
+
+                        var createResult = await tx.RunAsync(createQuery, parameters);
+                        return await createResult.FetchAsync();
+                    });
+
+                    return result;
                 }
             }
-
-            return false;
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Lỗi khi đăng ký khách hàng: {ex.Message}");
+                return false;
+            }
         }
 
         private async void btnDangki_Click(object sender, EventArgs e)
@@ -58,6 +78,11 @@ namespace RC
                 return;
             }
 
+            //if (!email.IsValid(email))
+            //{
+            //    throw new ArgumentException("Email không hợp lệ.");
+            //}
+
             if (pass != rePass)
             {
                 MessageBox.Show("Mật khẩu xác nhận không khớp.");
@@ -70,10 +95,13 @@ namespace RC
             {
                 MessageBox.Show("Đăng ký thành công!");
                 // Có thể thực hiện các hành động khác như chuyển hướng hoặc đóng form
+                FormLogin formLogin = new FormLogin();
+                formLogin.Show();
+                this.Hide();
             }
             else
             {
-                MessageBox.Show("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.");
+                MessageBox.Show("Email đã được đăng ký!");
             }
         }
 
