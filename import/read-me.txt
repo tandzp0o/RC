@@ -1,0 +1,8 @@
+muốn import file csv đầu tiên phải thêm các file csv muốn add vào 
+folder import của DBMS:
++ nhấp ...
++ chọn Open foler
++ chọn import
+thêm cái file csv vào folder import
+sau đó mở file code import copy vô chạy từ đầu tới trước khúc //chạy riếng
+sau đó ở các đoạn sau chạy lần lượt để import thuộc tính

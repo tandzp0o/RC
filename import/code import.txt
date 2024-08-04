@@ -13,11 +13,6 @@ MERGE (b:Brand {name: p.brand})
 MERGE (p)-[pc:MADE_BY]->(b) 
 
 WITH p
-LOAD CSV WITH HEADERS FROM 'file:///brand.csv' AS row
-MATCH (b:Brand {name: row.name})
-SET b.image = row.image
-
-WITH p
 MERGE (c:Category {category_id: p.category_id})  // Create Category node
 MERGE (p)-[pc:IN_CATEGORY]->(c)  // Create relationship between product and category
 
@@ -29,3 +24,8 @@ SET c.name = row.name, c.image = row.image
 // goi rieng 
 LOAD CSV WITH HEADERS FROM 'file:///Customer.csv' AS row
 MERGE (customer:Customer {customer_id: row.customer_id, gender: row.gender,name: row.name, email: row.email, age: row.age})
+
+// rieng 2
+LOAD CSV WITH HEADERS FROM 'file:///brand.csv' AS row
+MATCH (b:Brand {name: row.name})
+SET b.image = row.image
