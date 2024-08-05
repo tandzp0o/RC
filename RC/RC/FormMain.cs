@@ -11,6 +11,7 @@ namespace RC
     {
         public string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName; // đường dẫn đến mục sản phẩm
         private FlowLayoutPanel _productPanel;
+        private FlowLayoutPanel _allProductPanel;
         public string email = "";
         private FlowLayoutPanel _categoryPanel;
         private FlowLayoutPanel _brandPanel;
@@ -34,27 +35,44 @@ namespace RC
         {
             _productPanel = new FlowLayoutPanel
             {
+                FlowDirection = FlowDirection.LeftToRight,
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                AutoScroll = true
+                AutoScroll = true,
+                Height = 230
             };
             PN1.Controls.Add(_productPanel);
+            
 
             _categoryPanel = new FlowLayoutPanel
             {
+                FlowDirection = FlowDirection.LeftToRight,
                 Dock = DockStyle.Fill,
-                BackColor= Color.White,
-                AutoScroll = true
+                BackColor = Color.White,
+                AutoScroll = true,
+                Height = 230
             };
             PN3.Controls.Add(_categoryPanel);
 
             _brandPanel = new FlowLayoutPanel
             {
+                FlowDirection = FlowDirection.LeftToRight,
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                AutoScroll = true
+                AutoScroll = true,
+                Height = 230
             };
             PN2.Controls.Add(_brandPanel);
+
+            _allProductPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
+                AutoScroll = true,
+                Height = 230
+            };
+            PN4.Controls.Add(_allProductPanel);
 
             /*Button refreshButton = new Button
             {
@@ -84,20 +102,21 @@ namespace RC
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            await LoadProducts();
+            await LoadProducts(null, 0);
             await LoadCategorys();
             await LoadBrands();
+            await LoadProducts(email, 1);
         }
 
-        private async Task LoadProducts()
+        private async Task LoadProducts(string e, int loai) // có e là trả về recom, loai = 0:them vào panel product-----1:la just for u
         {
             try
             {
                 _productPanel.Controls.Clear();
-                var products = await _connection.GetProductsAsync(email);
+                var products = await _connection.GetProductsAsync(e);
                 foreach (var product in products)
                 {
-                    AddProductToPanel(product);
+                    AddProductToPanel(product, loai);
                 }
             }
             catch (Exception ex)
@@ -159,7 +178,7 @@ namespace RC
                 TextAlign = ContentAlignment.MiddleCenter,
                 Width = 100
             };
-            
+
             Panel brandPanel = new Panel
             {
                 Width = 110,
@@ -217,8 +236,9 @@ namespace RC
         }
         /////////////////////////////
 
-        private void AddProductToPanel(Product product)
+        private void AddProductToPanel(Product product, int loai)
         {
+
             PictureBox pictureBox = new PictureBox
             {
                 Width = 100,
@@ -245,8 +265,14 @@ namespace RC
             productPanel.Controls.Add(pictureBox);
             productPanel.Controls.Add(nameLabel);
             nameLabel.Location = new System.Drawing.Point(0, 105);
-
-            _productPanel.Controls.Add(productPanel);
+            if (loai == 0) // chung
+            {
+                _allProductPanel.Controls.Add(productPanel);
+            }
+            else // recom
+            {
+                _productPanel.Controls.Add(productPanel);
+            }
         }
 
         private Image LoadImage(string imagePath, object entity = null)
@@ -290,6 +316,10 @@ namespace RC
             _connection.Dispose();
         }
 
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 
 

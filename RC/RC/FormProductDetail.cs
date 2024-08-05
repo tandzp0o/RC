@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -160,7 +161,7 @@ namespace RC
             anhSP.BackgroundImage = new Bitmap(bitmap);
             anhSP.BackgroundImageLayout = ImageLayout.Zoom;
             nameSP.Text = productName.Name;
-            giaSP.Text = $"Giá: {productName.Price:C}";
+            giaSP.Text = FormatCurrency(productName.Price.ToString());
             gia = (double)productName.Price;
             InitializeUI();
         }
@@ -206,14 +207,23 @@ namespace RC
                 sl = 0;
             }
             soLuong.Text = sl.ToString();
-            giaSP.Text = (sl * gia).ToString();
+            giaSP.Text = FormatCurrency((sl * gia).ToString());
         }
 
         private void btnInc_Click(object sender, EventArgs e)
         {
             sl += 1;
             soLuong.Text = sl.ToString();
-            giaSP.Text = (sl * gia).ToString();
+            giaSP.Text = FormatCurrency((sl * gia).ToString());
+        }
+
+        public static string FormatCurrency(string number)
+        {
+            if (long.TryParse(number, out long parsedNumber))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0:N0}", parsedNumber).Replace(',', '.');
+            }
+            return "Invalid input";
         }
     }
 
