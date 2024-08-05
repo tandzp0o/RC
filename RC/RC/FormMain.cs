@@ -1,6 +1,9 @@
 ﻿using Neo4j.Driver;
+using Neo4jClient.Cypher;
+using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace RC
 {
@@ -8,6 +11,7 @@ namespace RC
     {
         public string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName; // đường dẫn đến mục sản phẩm
         private FlowLayoutPanel _productPanel;
+        public string email = "";
         private FlowLayoutPanel _categoryPanel;
         private FlowLayoutPanel _brandPanel;
         private Neo4jConnection _connection;
@@ -17,6 +21,15 @@ namespace RC
             _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
             InitializeUI();
         }
+
+        public FormMain(string kh)
+        {
+            InitializeComponent();
+            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
+            InitializeUI();
+            email = kh;
+        }
+
         private void InitializeUI()
         {
             _productPanel = new FlowLayoutPanel
@@ -43,7 +56,7 @@ namespace RC
             };
             PN2.Controls.Add(_brandPanel);
 
-            Button refreshButton = new Button
+            /*Button refreshButton = new Button
             {
                 Text = "Refresh Products",
                 Dock = DockStyle.Top
@@ -64,8 +77,8 @@ namespace RC
                 Text = "Refresh Categorys",
                 Dock = DockStyle.Top
             };
-            refreshButton.Click += async (sender, e) => await LoadCategorys();
-            PN2.Controls.Add(refreshButton2);
+            refreshButton.Click += async (sender, e) => await LoadBrands();
+            PN2.Controls.Add(refreshButton2);*/
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -81,7 +94,7 @@ namespace RC
             try
             {
                 _productPanel.Controls.Clear();
-                var products = await _connection.GetProductsAsync();
+                var products = await _connection.GetProductsAsync(email);
                 foreach (var product in products)
                 {
                     AddProductToPanel(product);
@@ -146,7 +159,7 @@ namespace RC
                 TextAlign = ContentAlignment.MiddleCenter,
                 Width = 100
             };
-
+            
             Panel brandPanel = new Panel
             {
                 Width = 110,
@@ -279,6 +292,13 @@ namespace RC
 
     }
 
+
+
+
+
+
+
+
     public class Neo4jConnection : IDisposable
     {
         public readonly IDriver _driver;
@@ -290,22 +310,86 @@ namespace RC
         }
 
         // lấy toàn bộ sp
-        public async Task<List<Product>> GetProductsAsync()
+        /*public async Task<List<Product>> GetProductsAsync(int n, string e)
         {
             await using var session = _driver.AsyncSession();
-            return await session.ReadTransactionAsync(async tx =>
-            {
-                var result = await tx.RunAsync("MATCH (p:Product) RETURN p.name AS name, p.image AS image");
-                var products = new List<Product>();
-                await foreach (var record in result)
+            
+                return await session.ReadTransactionAsync(async tx =>
                 {
-                    string name = record["name"].As<string>();
-                    string image = record["image"].As<string>();
-                    products.Add(new Product(name, image));
-                }
-                return products;
-            });
+                    var result = await tx.RunAsync("MATCH (p:Product) RETURN p.name AS name, p.image AS image");
+                    var products = new List<Product>();
+                    await foreach (var record in result)
+                    {
+                        string name = record["name"].As<string>();
+                        string image = record["image"].As<string>();
+                        products.Add(new Product(name, image));
+                    }
+                    return products;
+                });
+            
+        }*/
+        public async Task<List<Product>> GetProductsAsync(string e) 
+        {
+            await using var session = _driver.AsyncSession();
+            if (e == null)
+            {
+                return await session.ReadTransactionAsync(async tx =>
+                {
+                    var result = await tx.RunAsync("MATCH (p:Product) RETURN p.name AS name, p.image AS image");
+                    var products = new List<Product>();
+                    await foreach (var record in result)
+                    {
+                        string name = record["name"].As<string>();
+                        string image = record["image"].As<string>();
+                        products.Add(new Product(name, image));
+                    }
+                    return products;
+                });
+            }
+            else
+            {
+                return await session.ReadTransactionAsync(async tx =>
+                {
+                    var query = "MATCH (a:Customer {email: $email})-[:BUY]->(b:Product)-[:IN_CATEGORY]->(c:Category) " +
+                        "WITH c, count(b) AS purchaseCount " +
+                        "ORDER BY purchaseCount DESC " +
+                        "LIMIT 1 " +
+                        "RETURN c.name AS name";
+
+                    var result = await tx.RunAsync(query, new { email = e });
+
+                    var record1 = await result.SingleAsync(); // nhận 1 bản ghi
+
+                    var result2 = await tx.RunAsync("MATCH (c:Category {name: '"+ record1["name"].As<string>() + "'})<-[:IN_CATEGORY]-(p:Product) " +
+                        "RETURN p.name AS name, p.image AS image" +
+                        " ORDER BY rand() LIMIT 5");
+
+                    var products = new List<Product>();
+                    await foreach (var record in result2)
+                    {
+                        string name = record["name"].As<string>();
+                        string image = record["image"].As<string>();
+                        products.Add(new Product(name, image));
+                    }
+                    return products;
+                });
+            }
         }
+
+        /*return await session.ReadTransactionAsync(async tx =>
+                {
+            var result = await tx.RunAsync("match(a:Customer{email:'" + form.email + "'}),(b:Product)where (a)-[:BUY]->(b) return b.name");
+
+
+            var products = new List<Product>();
+            await foreach (var record in result)
+            {
+                string name = record["name"].As<string>();
+                string image = record["image"].As<string>();
+                products.Add(new Product(name, image));
+            }
+            return products;
+        });*/
         //lấy toàn bộ category
         public async Task<List<Category>> GetCategory()
         {
@@ -340,27 +424,49 @@ namespace RC
                 return brands;
             });
         }
-        // truy vấn category từ product
-        public async Task<Category> GetCategoryFromP(Product p)
+        // truy vấn lấy sản phẩm liên quan từ product
+        public async Task<List<Product>> GetSameCategoryFromP(Product p)
         {
             await using var session = _driver.AsyncSession();
             return await session.ReadTransactionAsync(async tx =>
             {
                 var result = await tx.RunAsync(
-                    "MATCH (a:Product {name: $name})-[:BELONGS_TO]->(b:Category) RETURN b.name AS name, b.image AS image",
-                    new { name = p.Name });
+                    "MATCH (a:Product {name: $name})-[:IN_CATEGORY]->(b:Category) RETURN b.name AS name",
+                    new { name = p.Name });// truyền tên sản phẩm để lấy category
+                var record1 = await result.SingleAsync(); // nhận 1 bản ghi
+                
+                
+                var result2 = await tx.RunAsync(
+                    "MATCH (a:Product)-[:IN_CATEGORY]->(b:Category{name: $name}) return a.name AS name, a.image AS image",
+                    new { name = record1["name"].As<string>() });
 
-                var record = await result.SingleAsync();
-                if (record != null)
+                var products = new List<Product>();
+                await foreach (var record in result2)
                 {
                     string name = record["name"].As<string>();
                     string image = record["image"].As<string>();
-                    return new Category(name, image);
+                    products.Add(new Product(name, image));
                 }
-                return null;
+                return products;
             });
         }
 
+        // ko thêm trùng product vào list
+        public async Task checkP(Product p)
+        {
+            await using var session = _driver.AsyncSession();
+            var product = await session.ReadTransactionAsync(async tx =>
+            {
+                var result = await tx.RunAsync(
+                    "MATCH (p:Product {name: $name}) " +
+                    "RETURN p.name AS name, p.image AS image, p.price AS price, p.description AS description",
+                    new { name = p.Name });
+
+                var record = await result.SingleAsync();
+
+                return false;
+            });
+        }
 
 
         // sự kiện click img

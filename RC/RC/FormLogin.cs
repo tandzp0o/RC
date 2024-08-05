@@ -37,7 +37,7 @@ namespace RC
             {
                 MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 // Chuyển hướng người dùng đến form chính hoặc thực hiện hành động tiếp theo
-                FormMain formMain = new FormMain();
+                FormMain formMain = new FormMain(txtUser.Text);
                 formMain.Show();
                 this.Hide();
             }

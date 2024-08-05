@@ -50,40 +50,43 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(25, 148);
+            label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label1.Location = new Point(354, 141);
             label1.Name = "label1";
-            label1.Size = new Size(57, 15);
+            label1.Size = new Size(82, 21);
             label1.TabIndex = 13;
             label1.Text = "Mật khẩu";
             // 
             // User
             // 
             User.AutoSize = true;
-            User.Location = new Point(25, 93);
+            User.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            User.Location = new Point(354, 78);
             User.Name = "User";
-            User.Size = new Size(36, 15);
+            User.Size = new Size(53, 21);
             User.TabIndex = 12;
             User.Text = "Email";
             // 
             // txtPassword
             // 
-            txtPassword.Location = new Point(25, 166);
+            txtPassword.Location = new Point(354, 165);
             txtPassword.Name = "txtPassword";
             txtPassword.Size = new Size(284, 23);
             txtPassword.TabIndex = 3;
             // 
             // txtEmail
             // 
-            txtEmail.Location = new Point(25, 111);
+            txtEmail.Location = new Point(354, 102);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(286, 23);
             txtEmail.TabIndex = 2;
             // 
             // btnDangki
             // 
-            btnDangki.Location = new Point(45, 297);
+            btnDangki.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            btnDangki.Location = new Point(354, 308);
             btnDangki.Name = "btnDangki";
-            btnDangki.Size = new Size(93, 40);
+            btnDangki.Size = new Size(129, 40);
             btnDangki.TabIndex = 7;
             btnDangki.Text = "Đăng kí";
             btnDangki.UseVisualStyleBackColor = true;
@@ -91,9 +94,10 @@
             // 
             // btnvedangnhap
             // 
-            btnvedangnhap.Location = new Point(174, 297);
+            btnvedangnhap.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            btnvedangnhap.Location = new Point(509, 308);
             btnvedangnhap.Name = "btnvedangnhap";
-            btnvedangnhap.Size = new Size(93, 40);
+            btnvedangnhap.Size = new Size(129, 40);
             btnvedangnhap.TabIndex = 8;
             btnvedangnhap.Text = "Về Đăng Nhập";
             btnvedangnhap.UseVisualStyleBackColor = true;
@@ -102,16 +106,16 @@
             // pictureBox1
             // 
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(335, 0);
+            pictureBox1.Location = new Point(0, 0);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(326, 355);
+            pictureBox1.Size = new Size(326, 381);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 7;
             pictureBox1.TabStop = false;
             // 
             // txtConfirmPassword
             // 
-            txtConfirmPassword.Location = new Point(23, 221);
+            txtConfirmPassword.Location = new Point(354, 228);
             txtConfirmPassword.Name = "txtConfirmPassword";
             txtConfirmPassword.Size = new Size(284, 23);
             txtConfirmPassword.TabIndex = 4;
@@ -119,9 +123,10 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(23, 203);
+            label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label2.Location = new Point(354, 204);
             label2.Name = "label2";
-            label2.Size = new Size(104, 15);
+            label2.Size = new Size(151, 21);
             label2.TabIndex = 15;
             label2.Text = "Nhập lại mật khẩu";
             // 
@@ -142,12 +147,12 @@
             panel1.Controls.Add(txtPassword);
             panel1.Location = new Point(12, 12);
             panel1.Name = "panel1";
-            panel1.Size = new Size(662, 355);
+            panel1.Size = new Size(662, 381);
             panel1.TabIndex = 16;
             // 
             // txtName
             // 
-            txtName.Location = new Point(25, 56);
+            txtName.Location = new Point(354, 39);
             txtName.Name = "txtName";
             txtName.Size = new Size(286, 23);
             txtName.TabIndex = 1;
@@ -155,18 +160,20 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(25, 38);
+            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label3.Location = new Point(354, 15);
             label3.Name = "label3";
-            label3.Size = new Size(44, 15);
+            label3.Size = new Size(63, 21);
             label3.TabIndex = 19;
             label3.Text = "Họ Tên";
             // 
             // rNu
             // 
             rNu.AutoSize = true;
-            rNu.Location = new Point(190, 265);
+            rNu.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            rNu.Location = new Point(523, 258);
             rNu.Name = "rNu";
-            rNu.Size = new Size(41, 19);
+            rNu.Size = new Size(52, 25);
             rNu.TabIndex = 6;
             rNu.TabStop = true;
             rNu.Text = "Nữ";
@@ -175,9 +182,10 @@
             // rNam
             // 
             rNam.AutoSize = true;
-            rNam.Location = new Point(72, 265);
+            rNam.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            rNam.Location = new Point(405, 258);
             rNam.Name = "rNam";
-            rNam.Size = new Size(51, 19);
+            rNam.Size = new Size(65, 25);
             rNam.TabIndex = 5;
             rNam.TabStop = true;
             rNam.Text = "Nam";
@@ -187,7 +195,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(684, 379);
+            ClientSize = new Size(684, 405);
             Controls.Add(panel1);
             Name = "FormRegister";
             Text = "FormRegister";

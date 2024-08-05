@@ -15,6 +15,7 @@ namespace RC
 {
     public partial class FormProductDetail : Form
     {
+        public Product p;
         private FlowLayoutPanel _categoryPanel;
         int sl = 1;
         double gia = 0;
@@ -22,8 +23,12 @@ namespace RC
         public FormProductDetail()
         {
             InitializeComponent();
-            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
-            InitializeUI();
+        }
+
+        protected override async void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            await LoadCategorys(p);
         }
 
         private void InitializeUI()
@@ -41,19 +46,19 @@ namespace RC
                 Text = "Refresh Categorys",
                 Dock = DockStyle.Top
             };
-            refreshButton2.Click += async (sender, e) => await LoadCategorys();
+            refreshButton2.Click += async (sender, e) => await LoadCategorys(p);
             PN3.Controls.Add(refreshButton2);
         }
 
-        private async Task LoadCategorys()
+        private async Task LoadCategorys(Product p)
         {
             try
             {
                 _categoryPanel.Controls.Clear();
-                var categorys = await _connection.GetCategory();
-                foreach (var cate in categorys)
+                var products = await _connection.GetSameCategoryFromP(p);
+                foreach (var cate in products)
                 {
-                    AddCategoryToPanel(cate);
+                    AddProductToPanel(cate);
                 }
             }
             catch (Exception ex)
@@ -62,36 +67,36 @@ namespace RC
             }
         }
 
-        private void AddCategoryToPanel(Category category)
+        private void AddProductToPanel(Product product)
         {
             PictureBox pictureBox = new PictureBox
             {
                 Width = 100,
                 Height = 100,
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Image = LoadImage(category.Image, category) ?? null,
+                Image = LoadImage(product.Image) ?? null,
                 Margin = new Padding(5)
             };
-            pictureBox.Tag = category.Name;
+            pictureBox.Tag = product.Name;
             pictureBox.Click += PictureBox_Click;
 
             Label nameLabel = new Label
             {
-                Text = category.Name,
+                Text = product.Name,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Width = 100
             };
 
-            Panel categoryPanel = new Panel
+            Panel productPanel = new Panel
             {
                 Width = 110,
                 Height = 130
             };
-            categoryPanel.Controls.Add(pictureBox);
-            categoryPanel.Controls.Add(nameLabel);
+            productPanel.Controls.Add(pictureBox);
+            productPanel.Controls.Add(nameLabel);
             nameLabel.Location = new System.Drawing.Point(0, 105);
 
-            _categoryPanel.Controls.Add(categoryPanel);
+            _categoryPanel.Controls.Add(productPanel);
         }
 
         private async void PictureBox_Click(object sender, EventArgs e)
@@ -147,6 +152,8 @@ namespace RC
         }
         public FormProductDetail(Product productName)
         {
+            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
+            p = productName;
             InitializeComponent();
             string path = GetSiblingDirectory("SP") + "\\" + RemoveQuotes(productName.Image); // đường dẫn tới hình ảnh
             Bitmap bitmap = new Bitmap(path);
@@ -155,6 +162,7 @@ namespace RC
             nameSP.Text = productName.Name;
             giaSP.Text = $"Giá: {productName.Price:C}";
             gia = (double)productName.Price;
+            InitializeUI();
         }
 
         private System.Drawing.Image LoadImage(string imagePath)
