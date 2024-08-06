@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Neo4j.Driver;
 using System.Reflection;
+using Neo4jClient.Cypher;
 namespace RC
 {
     public partial class FormLogin : Form
@@ -36,10 +37,19 @@ namespace RC
             if (isValid)
             {
                 MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                // Chuyển hướng người dùng đến form chính hoặc thực hiện hành động tiếp theo
-                FormMain formMain = new FormMain(txtUser.Text);
-                formMain.Show();
-                this.Hide();
+                bool isAdmin = await IsCustomerAdmin(email);
+                if (isAdmin)
+                {
+                    FormManager formManager = new FormManager();
+                    formManager.ShowDialog();
+                }
+                else
+                {
+                    // Chuyển hướng người dùng đến form chính hoặc thực hiện hành động tiếp theo
+                    FormMain formMain = new FormMain(txtUser.Text);
+                    formMain.Show();
+                    this.Hide();
+                } 
             }
             else
             {
@@ -80,6 +90,19 @@ namespace RC
             }
         }
 
+        public async Task<bool> IsCustomerAdmin(string email)
+        {
+            await using var session = _driver.AsyncSession();
+            return await session.ReadTransactionAsync(async tx =>
+            {
+                var query = "MATCH (a:Customer {email: '"+email+"'}) RETURN a.ad IS NOT NULL AND a.ad = '1' AS isAdmin";
+
+                var result = await tx.RunAsync(query);
+                var record = await result.SingleAsync();
+                return record["isAdmin"].As<bool>();
+            });
+        }
+
         // giải phóng tài nguyên khi đóng form
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
@@ -99,9 +122,9 @@ namespace RC
 
         private void FormLogin_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DialogResult r = MessageBox.Show("Bạn có muốn thoát?", "Thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-            if (r == DialogResult.No)
-                e.Cancel = true;
+            //DialogResult r = MessageBox.Show("Bạn có muốn thoát?", "Thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+            //if (r == DialogResult.No)
+            //    e.Cancel = true;
         }
     }
 }

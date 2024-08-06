@@ -82,9 +82,10 @@
             // label4
             // 
             label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label4.Location = new Point(467, 189);
             label4.Name = "label4";
-            label4.Size = new Size(66, 15);
+            label4.Size = new Size(76, 17);
             label4.TabIndex = 13;
             label4.Text = "All Product";
             // 
@@ -121,9 +122,10 @@
             // label11
             // 
             label11.AutoSize = true;
+            label11.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label11.Location = new Point(282, 23);
             label11.Name = "label11";
-            label11.Size = new Size(63, 15);
+            label11.Size = new Size(74, 17);
             label11.TabIndex = 9;
             label11.Text = "Add Brand";
             // 
@@ -141,9 +143,10 @@
             // label13
             // 
             label13.AutoSize = true;
+            label13.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label13.Location = new Point(194, 53);
             label13.Name = "label13";
-            label13.Size = new Size(71, 15);
+            label13.Size = new Size(84, 17);
             label13.TabIndex = 1;
             label13.Text = "Brand name";
             // 
@@ -187,18 +190,20 @@
             // label3
             // 
             label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label3.Location = new Point(279, 19);
             label3.Name = "label3";
-            label3.Size = new Size(74, 15);
+            label3.Size = new Size(84, 17);
             label3.TabIndex = 12;
             label3.Text = "Add Product";
             // 
             // label2
             // 
             label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label2.Location = new Point(191, 257);
             label2.Name = "label2";
-            label2.Size = new Size(51, 15);
+            label2.Size = new Size(57, 17);
             label2.TabIndex = 10;
             label2.Text = "Amount";
             // 
@@ -212,9 +217,10 @@
             // label7
             // 
             label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label7.Location = new Point(191, 119);
             label7.Name = "label7";
-            label7.Size = new Size(55, 15);
+            label7.Size = new Size(63, 17);
             label7.TabIndex = 2;
             label7.Text = "Category";
             // 
@@ -240,9 +246,10 @@
             // label8
             // 
             label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label8.Location = new Point(191, 47);
             label8.Name = "label8";
-            label8.Size = new Size(82, 15);
+            label8.Size = new Size(94, 17);
             label8.TabIndex = 1;
             label8.Text = "Product name";
             // 
@@ -258,9 +265,10 @@
             // label9
             // 
             label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label9.Location = new Point(191, 165);
             label9.Name = "label9";
-            label9.Size = new Size(38, 15);
+            label9.Size = new Size(45, 17);
             label9.TabIndex = 3;
             label9.Text = "Brand";
             // 
@@ -274,9 +282,10 @@
             // label10
             // 
             label10.AutoSize = true;
+            label10.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label10.Location = new Point(191, 211);
             label10.Name = "label10";
-            label10.Size = new Size(33, 15);
+            label10.Size = new Size(38, 17);
             label10.TabIndex = 4;
             label10.Text = "Price";
             // 
@@ -323,9 +332,10 @@
             // label6
             // 
             label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label6.Location = new Point(284, 23);
             label6.Name = "label6";
-            label6.Size = new Size(80, 15);
+            label6.Size = new Size(92, 17);
             label6.TabIndex = 9;
             label6.Text = "Add Category";
             // 
@@ -339,9 +349,10 @@
             // label1
             // 
             label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold | FontStyle.Italic);
             label1.Location = new Point(194, 53);
             label1.Name = "label1";
-            label1.Size = new Size(88, 15);
+            label1.Size = new Size(102, 17);
             label1.TabIndex = 1;
             label1.Text = "Category name";
             // 

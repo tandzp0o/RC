@@ -16,6 +16,7 @@ namespace RC
 {
     public partial class FormProductDetail : Form
     {
+        private FormMain _formMain;
         public Product p;
         public string email;
         private FlowLayoutPanel _categoryPanel;
@@ -121,6 +122,7 @@ namespace RC
             {
                 _connection.HandleBuyClickAsync(p.Name, email, sl);
                 MessageBox.Show("Mua thành công");
+                
             }
         }
 
@@ -163,10 +165,11 @@ namespace RC
         {
             return input.Replace("\"", "").Replace("'", "");
         }
-        public FormProductDetail(Product productName, string e)
+        public FormProductDetail(Product productName, string e, FormMain formMain)
         {
+            _formMain = formMain;
             email = e;
-            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
+            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111", _formMain);
             p = productName;
             InitializeComponent();
             string path = GetSiblingDirectory("SP") + "\\" + RemoveQuotes(productName.Image); // đường dẫn tới hình ảnh
@@ -177,6 +180,7 @@ namespace RC
             giaSP.Text = FormatCurrency(productName.Price.ToString());
             gia = (double)productName.Price;
             InitializeUI();
+            _formMain = formMain;
         }
 
         private System.Drawing.Image LoadImage(string imagePath)
@@ -244,9 +248,9 @@ namespace RC
             Close();
         }
 
-        private void FormProductDetail_FormClosing(object sender, FormClosingEventArgs e)
+        private async void FormProductDetail_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            await _formMain.LoadProducts(email, 1);
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Drawing.Imaging;
 using System.Reflection;
 using System.Xml.Linq;
@@ -19,14 +20,14 @@ namespace RC
         public FormMain()
         {
             InitializeComponent();
-            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
+            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111",this);
             InitializeUI();
         }
 
         public FormMain(string kh)
         {
             InitializeComponent();
-            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
+            _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111", this);
             InitializeUI();
             email = kh;
         }
@@ -102,13 +103,13 @@ namespace RC
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            await LoadProducts(null, 0);
+            await LoadProducts(null, 0); //all pro vao panel pro
             await LoadCategorys();
             await LoadBrands();
-            await LoadProducts(email, 1);
+            await LoadProducts(email, 1); //recom ve just for u
         }
 
-        private async Task LoadProducts(string e, int loai) // có e là trả về recom, loai = 0:them vào panel product-----1:la just for u
+        public async Task LoadProducts(string e, int loai) // có e là trả về recom, loai = 0:them vào panel product-----1:la just for u
         {
             try
             {
@@ -345,10 +346,13 @@ namespace RC
     public class Neo4jConnection : IDisposable
     {
         public readonly IDriver _driver;
-        
+        public FormMain f;
 
-        public Neo4jConnection(string uri, string user, string password)
+
+
+        public Neo4jConnection(string uri, string user, string password, FormMain ff=null)
         {
+            f = ff;
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
         }
 
@@ -371,10 +375,10 @@ namespace RC
                 });
             
         }*/
-        public async Task<List<Product>> GetProductsAsync(string e) 
+        public async Task<List<Product>> GetProductsAsync(string e)
         {
             await using var session = _driver.AsyncSession();
-            if (e == null)
+            if (e == null) // lấy all
             {
                 return await session.ReadTransactionAsync(async tx =>
                 {
@@ -389,34 +393,72 @@ namespace RC
                     return products;
                 });
             }
-            else
+            else // lấy recom
             {
-                return await session.ReadTransactionAsync(async tx =>
+                int purchaseCount = await GetCustomerPurchaseCount(e);
+                if (purchaseCount > 0)
                 {
-                    var query = "MATCH (a:Customer {email: $email})-[:BUY]->(b:Product)-[:IN_CATEGORY]->(c:Category) " +
-                        "WITH c, count(b) AS purchaseCount " +
-                        "ORDER BY purchaseCount DESC " +
-                        "LIMIT 1 " +
-                        "RETURN c.name AS name";
 
-                    var result = await tx.RunAsync(query, new { email = e });
-
-                    var record1 = await result.SingleAsync(); // nhận 1 bản ghi
-
-                    var result2 = await tx.RunAsync("MATCH (c:Category {name: '"+ record1["name"].As<string>() + "'})<-[:IN_CATEGORY]-(p:Product) " +
-                        "RETURN p.name AS name, p.image AS image" +
-                        " ORDER BY rand() LIMIT 5");
-
-                    var products = new List<Product>();
-                    await foreach (var record in result2)
+                    return await session.ReadTransactionAsync(async tx =>
                     {
-                        string name = record["name"].As<string>();
-                        string image = record["image"].As<string>();
-                        products.Add(new Product(name, image));
-                    }
-                    return products;
-                });
+                        var query = "MATCH (a:Customer {email: $email})-[:BUY]->(b:Product)-[:IN_CATEGORY]->(c:Category) " +
+                            "WITH c, count(b) AS purchaseCount " +
+                            "ORDER BY purchaseCount DESC " +
+                            "LIMIT 1 " +
+                            "RETURN c.name AS name";
+
+                        var result = await tx.RunAsync(query, new { email = e });
+                        var products = new List<Product>();
+
+                        var record1 = await result.SingleAsync(); // nhận 1 bản ghi
+
+                        var result2 = await tx.RunAsync("MATCH (c:Category {name: '" + record1["name"].As<string>() + "'})<-[:IN_CATEGORY]-(p:Product) " +
+                            "RETURN p.name AS name, p.image AS image" +
+                            " ORDER BY rand() LIMIT 5");
+
+                        await foreach (var record in result2)
+                        {
+                            string name = record["name"].As<string>();
+                            string image = record["image"].As<string>();
+                            products.Add(new Product(name, image));
+                        }
+                        return products;
+
+                    });
+                }
+                else
+                {
+                    return await session.ReadTransactionAsync(async tx =>
+                    {
+                        var result = await tx.RunAsync("MATCH (p:Product) RETURN p.name AS name, p.image AS image");
+                        var products = new List<Product>();
+                        await foreach (var record in result)
+                        {
+                            string name = record["name"].As<string>();
+                            string image = record["image"].As<string>();
+                            products.Add(new Product(name, image));
+                        }
+                        return products;
+                    });
+                }    
             }
+        }
+
+        // đếm số lần mua hàng
+        public async Task<int> GetCustomerPurchaseCount(string email)
+        {
+            await using var session = _driver.AsyncSession();
+            return await session.ReadTransactionAsync(async tx =>
+            {
+                var query = @"
+            MATCH (c:Customer {email: $email})-[:BUY]->(p:Product)
+            RETURN COUNT(DISTINCT p) AS purchaseCount
+        ";
+
+                var result = await tx.RunAsync(query, new { email });
+                var record = await result.SingleAsync();
+                return record["purchaseCount"].As<int>();
+            });
         }
 
         /*return await session.ReadTransactionAsync(async tx =>
@@ -537,7 +579,7 @@ namespace RC
 
         private void UpdateUI(Product product, string email)
         {
-            FormProductDetail productDetail = new FormProductDetail(product, email);
+            FormProductDetail productDetail = new FormProductDetail(product, email,f);
             productDetail.StartPosition = FormStartPosition.Manual;
             productDetail.Location = new System.Drawing.Point(100, 100);
             productDetail.ShowDialog();
@@ -639,7 +681,7 @@ namespace RC
                     var cursor = await tx.RunAsync(query, parameters);
                     return await cursor.SingleAsync();
                 });
-
+                MessageBox.Show("Thêm thành công");
                 return result != null;
             }
             catch (Exception ex)
@@ -672,7 +714,7 @@ namespace RC
                     var cursor = await tx.RunAsync(query, parameters);
                     return await cursor.SingleAsync();
                 });
-
+                MessageBox.Show("Thêm thành công");
                 return result != null;
             }
             catch (Exception ex)
@@ -705,7 +747,7 @@ namespace RC
                     var cursor = await tx.RunAsync(query, parameters);
                     return await cursor.SingleAsync();
                 });
-
+                MessageBox.Show("Thêm thành công");
                 return result != null;
             }
             catch (Exception ex)

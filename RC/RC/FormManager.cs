@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace RC
 {
@@ -25,6 +26,7 @@ namespace RC
         private void FormManager_Load(object sender, EventArgs e)
         {
             LoadComboBoxAsync();
+            LoadProductsToDataGridView(dataGridView1, null);
         }
         // load 2 cbb
         private async Task LoadComboBoxAsync()
@@ -98,28 +100,67 @@ namespace RC
         {
             _connection.AddBrandAsync(txtBrand.Text,tagB);
             LoadComboBoxAsync();
-            txtBrand.Clear();   
-            
+            txtBrand.Clear();
+            pictureBox3.Image.Dispose();
+            pictureBox3.Image = null;
+
         }
         // sự kiện thêm Cate
         private void btnAddC_Click(object sender, EventArgs e)
         {
             _connection.AddCateAsync(txtCate.Text, tagC);
             LoadComboBoxAsync();
+            txtCate.Clear();
+            pictureBox1.Image.Dispose();
+            pictureBox1.Image = null;
         }
         // sự kiện thêm Pro
         private void btnAddP_Click(object sender, EventArgs e)
         {
             _connection.AddProductAsync(txtPro.Text, tagP, txtPrice.Text, 
-                txtAmount.Text, cbbCate.SelectedText, cbbBrand.SelectedText);
+                txtAmount.Text, cbbCate.SelectedValue.ToString(), cbbBrand.SelectedValue.ToString());
             LoadComboBoxAsync();
+            txtPro.Clear();
+            pictureBox2.Image.Dispose();
+            pictureBox2.Image = null;
+            txtAmount.Clear();
+            txtPrice.Clear();
         }
 
         private void cbbCate_SelectedIndexChanged(object sender, EventArgs e)
         {
-
         }
 
-        
+        public async Task LoadProductsToDataGridView(DataGridView dataGridView, string email = null)
+        {
+            try
+            {
+                // Lấy danh sách sản phẩm
+                List<Product> products = await _connection.GetProductsAsync(email);
+
+                // Xóa tất cả các dòng hiện có trong DataGridView
+                dataGridView.Rows.Clear();
+
+                // Đảm bảo DataGridView có đủ cột
+                if (dataGridView.Columns.Count == 0)
+                {
+                    dataGridView.Columns.Add("Name", "Tên sản phẩm");
+                    dataGridView.Columns.Add("Image", "Hình ảnh");
+                }
+
+                // Thêm sản phẩm vào DataGridView
+                foreach (var product in products)
+                {
+                    dataGridView.Rows.Add(product.Name, product.Image);
+                }
+
+                // Tự động điều chỉnh kích thước cột
+                dataGridView.AutoResizeColumns();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Có lỗi xảy ra khi tải sản phẩm: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
