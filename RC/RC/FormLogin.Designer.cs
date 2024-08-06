@@ -131,6 +131,7 @@
             Controls.Add(panel1);
             Name = "FormLogin";
             Text = "FormLogin";
+            FormClosing += FormLogin_FormClosing;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

@@ -42,7 +42,7 @@ namespace RC
                 Height = 230
             };
             PN1.Controls.Add(_productPanel);
-            
+
 
             _categoryPanel = new FlowLayoutPanel
             {
@@ -230,7 +230,8 @@ namespace RC
                 string productName = pictureBox.Tag as string;
                 if (!string.IsNullOrEmpty(productName))
                 {
-                    _connection.HandleProductClickAsync(productName);
+                    _connection.HandleProductClickAsync(productName, email);
+
                 }
             }
         }
@@ -319,6 +320,18 @@ namespace RC
         private void FormMain_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void PN2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Hide();
+            FormLogin formLogin = new FormLogin();
+            formLogin.ShowDialog();
         }
     }
 
@@ -501,7 +514,7 @@ namespace RC
 
         // sự kiện click img
         // sản phẩm
-        public async Task HandleProductClickAsync(string productName)
+        public async Task HandleProductClickAsync(string productName, string e)
         {
             await using var session = _driver.AsyncSession();
             var product = await session.ReadTransactionAsync(async tx =>
@@ -519,17 +532,188 @@ namespace RC
                 );
             });
 
-            UpdateUI(product);
+            UpdateUI(product, e);
         }
 
-        private void UpdateUI(Product product)
+        private void UpdateUI(Product product, string email)
         {
-            FormProductDetail productDetail = new FormProductDetail(product);
+            FormProductDetail productDetail = new FormProductDetail(product, email);
+            productDetail.StartPosition = FormStartPosition.Manual;
+            productDetail.Location = new System.Drawing.Point(100, 100);
             productDetail.ShowDialog();
         }
+        // sự kiện click buy
+        public async Task HandleBuyClickAsync(string productName, string email, int amount)
+        {
+            await using var session = _driver.AsyncSession();
+            await session.WriteTransactionAsync(async tx =>
+            {
+                var query = @"
+            MATCH (a:Customer {email: $email}), (b:Product {name: $name})
+            CREATE (a)-[c:BUY {amount: $amount}]->(b)
+        ";
 
-        
-        // brand hoặc cate
+                var parameters = new
+                {
+                    email,
+                    name = productName,
+                    amount
+                };
+
+                await tx.RunAsync(query, parameters);
+            });
+        }
+        // load brand và cate
+        public async Task<List<string>> GetBrandNamesAsync()
+        {
+            var query = "MATCH (b:Brand) RETURN b.name AS Name ORDER BY b.name";
+            return await ExecuteQueryAndGetNamesAsync(query);
+        }
+
+        public async Task<List<string>> GetCategoryNamesAsync()
+        {
+            var query = "MATCH (c:Category) RETURN c.name AS Name ORDER BY c.name";
+            return await ExecuteQueryAndGetNamesAsync(query);
+        }
+
+        private async Task<List<string>> ExecuteQueryAndGetNamesAsync(string query)
+        {
+            var names = new List<string>();
+            await using var session = _driver.AsyncSession();
+            try
+            {
+                var result = await session.ReadTransactionAsync(async tx =>
+                {
+                    var cursor = await tx.RunAsync(query);
+                    return await cursor.ToListAsync();
+                });
+
+                foreach (var record in result)
+                {
+                    names.Add(record["Name"].As<string>());
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                // Có thể thêm xử lý lỗi khác ở đây nếu cần
+            }
+            return names;
+        }
+        //////////////////////////////
+        /// thêm product
+        public async Task<bool> AddProductAsync(string name, string image, string price, string amount, string categoryName, string brandName)
+        {
+            var query = @"
+            MATCH (c:Category {name: $categoryName})
+            MATCH (b:Brand {name: $brandName})
+            CREATE (p:Product {
+                name: $name,
+                image: $image,
+                price: $price,
+                amount: $amount
+            })
+            CREATE (p)-[:IN_CATEGORY]->(c)
+            CREATE (p)-[:MADE_BY]->(b)
+            WITH p, b
+            MATCH (otherProduct:Product)-[:MADE_BY]->(b)
+            WHERE otherProduct <> p
+            CREATE (p)-[:SAME_BRAND]->(otherProduct)
+            RETURN p";
+
+            var parameters = new
+            {
+                name,
+                image,
+                price,
+                amount,
+                categoryName,
+                brandName
+            };
+
+            try
+            {
+                await using var session = _driver.AsyncSession();
+                var result = await session.WriteTransactionAsync(async tx =>
+                {
+                    var cursor = await tx.RunAsync(query, parameters);
+                    return await cursor.SingleAsync();
+                });
+
+                return result != null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding product: {ex.Message}");
+                return false;
+            }
+        }
+        /// thêm brand
+        public async Task<bool> AddBrandAsync(string name, string image)
+        {
+            var query = @"
+            CREATE (b:Brand {
+                name: $name,
+                image: $image
+            })
+            RETURN b";
+
+            var parameters = new
+            {
+                name,
+                image
+            };
+
+            try
+            {
+                await using var session = _driver.AsyncSession();
+                var result = await session.WriteTransactionAsync(async tx =>
+                {
+                    var cursor = await tx.RunAsync(query, parameters);
+                    return await cursor.SingleAsync();
+                });
+
+                return result != null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding brand: {ex.Message}");
+                return false;
+            }
+        }
+        /// thêm cate
+        public async Task<bool> AddCateAsync(string name, string image)
+        {
+            var query = @"
+            CREATE (c:Category {
+                name: $name,
+                image: $image
+            })
+            RETURN c";
+
+            var parameters = new
+            {
+                name,
+                image
+            };
+
+            try
+            {
+                await using var session = _driver.AsyncSession();
+                var result = await session.WriteTransactionAsync(async tx =>
+                {
+                    var cursor = await tx.RunAsync(query, parameters);
+                    return await cursor.SingleAsync();
+                });
+
+                return result != null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding category: {ex.Message}");
+                return false;
+            }
+        }
         public void Dispose()
         {
             _driver?.Dispose();

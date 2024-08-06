@@ -17,6 +17,7 @@ namespace RC
     public partial class FormProductDetail : Form
     {
         public Product p;
+        public string email;
         private FlowLayoutPanel _categoryPanel;
         int sl = 1;
         double gia = 0;
@@ -107,8 +108,19 @@ namespace RC
                 string productName = pictureBox.Tag as string;
                 if (!string.IsNullOrEmpty(productName))
                 {
-                    _connection.HandleProductClickAsync(productName);
+                    _connection.HandleProductClickAsync(productName, email);
                 }
+            }
+        }
+
+        private void btnBuy_Click(object sender, EventArgs e)
+        {
+            if (sl <= 0)
+            { return; }
+            else
+            {
+                _connection.HandleBuyClickAsync(p.Name, email, sl);
+                MessageBox.Show("Mua thành công");
             }
         }
 
@@ -151,8 +163,9 @@ namespace RC
         {
             return input.Replace("\"", "").Replace("'", "");
         }
-        public FormProductDetail(Product productName)
+        public FormProductDetail(Product productName, string e)
         {
+            email = e;
             _connection = new Neo4jConnection("bolt://localhost:7687", "neo4j", "11111111");
             p = productName;
             InitializeComponent();
@@ -224,6 +237,16 @@ namespace RC
                 return string.Format(CultureInfo.InvariantCulture, "{0:N0}", parsedNumber).Replace(',', '.');
             }
             return "Invalid input";
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void FormProductDetail_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
         }
     }
 

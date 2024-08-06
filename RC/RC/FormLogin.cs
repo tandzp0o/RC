@@ -48,21 +48,36 @@ namespace RC
         }
         private async Task<bool> CheckLogin(string email, string pass)
         {
-            var query = "MATCH (u:Customer {email:'" + email+"'}) RETURN u.pass AS Pass";
+            var query = @" MATCH (u:Customer {email: $email}) RETURN u.pass AS Pass";
 
             using (var session = _driver.AsyncSession())
             {
-                var result = await session.RunAsync(query, new { email});
-                var record = await result.SingleAsync();
-
-                if (record != null)
+                try
                 {
-                    var retrievedPassword = record["Pass"].As<string>();
-                    return pass == retrievedPassword;
+                    var result = await session.ReadTransactionAsync(async tx =>
+                    {
+                        var cursor = await tx.RunAsync(query, new { email });
+                        return await cursor.ToListAsync();
+                    });
+
+                    if (result.Count == 0)
+                    {
+
+                        return false;
+                    }
+                    var retrievedPassword = result[0]["Pass"].As<string>();
+                    if (pass == retrievedPassword)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Đã xảy ra lỗi: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
                 }
             }
-
-            return false;
         }
 
         // giải phóng tài nguyên khi đóng form
@@ -80,6 +95,13 @@ namespace RC
 
             // Ẩn form đăng nhập hiện tại
             this.Hide();
+        }
+
+        private void FormLogin_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult r = MessageBox.Show("Bạn có muốn thoát?", "Thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+            if (r == DialogResult.No)
+                e.Cancel = true;
         }
     }
 }
