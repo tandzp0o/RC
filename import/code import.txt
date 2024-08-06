@@ -29,3 +29,6 @@ MERGE (customer:Customer {customer_id: row.customer_id, gender: row.gender,name:
 LOAD CSV WITH HEADERS FROM 'file:///brand.csv' AS row
 MATCH (b:Brand {name: row.name})
 SET b.image = row.image
+//3
+MATCH (c:Customer ), (p:Product {product_id: '1'})
+CREATE (c)-[:BUY]->(p);
